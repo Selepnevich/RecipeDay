@@ -1,30 +1,21 @@
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
-from django.contrib import auth
-from django.urls import reverse
 
-from users.forms import UserLoginForm
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.contrib.auth import authenticate
 
-# from django.contrib.auth import LoginView
+class LoginAPI(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        user = authenticate(username=username, password=password)
 
-# class LoginView(LoginView):
-#     pass
-
-
-def login(request):
-    if request.method == "POST":
-        form = UserLoginForm(data=request.POST)
-        if form.is_valid:
-            username = request.POST["username"]
-            password = request.POST["password"]
-            user = auth.authenticate(username=username, password=password)
-
-            if user:
-                auth.login(request, user)
-                return HttpResponseRedirect(reverse("main:index"))
+        if user is not None:
+            # Логин успешен, возвращаем данные о пользователе
+            return Response(
+                {
+                    "username": user.username,
+                    "email": user.email,
+                }
+            )
         else:
-            form = UserLoginForm()
-
-    context = {"title": "Авторизация"}
-
-    return render(request, "user/login.html", context=context)
+            return Response({"error": "Invalid credentials"}, status=400)

@@ -1,8 +1,8 @@
 from django.urls import path
-from main import views
+from main.views import *
 
 app_name = "main"
 
 urlpatterns = [
-    path("", views.IndexViews.as_view(), name="index"),
+    path("", RecipeAPIList.as_view(), name="index"),
 ]
